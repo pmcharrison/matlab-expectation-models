@@ -1,7 +1,7 @@
 % This function is a modified version of CollinsEtAl_analysis.m
 % from the JLMT source code.
 
-function out = collins_2014(input_wav_file_name, input_wav_dir, ...
+function [out, results] = collins_2014(input_wav_file_name, input_wav_dir, ...
     target_chord_index, ... % 1-indexed
     audio_leading_time_delay_sec, ... 
     tempo, ...
@@ -45,7 +45,7 @@ ioi = 60 / tempo;
 chord_onsets_until_target_sec = audio_leading_time_delay_sec + ...
     (0:(target_chord_index - 1)) * ioi;
 
-params = modified_CollinsEtAl_globals(struct, chord_onsets_until_target_sec);
+params = modified_collins_globals(struct, chord_onsets_until_target_sec);
 
 % Initialize structure that will be passed to jlmt_proc_series
 in_data = ensemble_init_data_struct;
