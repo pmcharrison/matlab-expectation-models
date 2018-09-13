@@ -2,7 +2,7 @@
 % This function is a substitute for CollinsEtAl_datasets that defines
 % a generic dataset.
 
-function dset = CollinsEtAl_generic_dataset(chord_onsets_until_target_sec) % e.g. 0:789.5:5526.5;
+function dset = collins_generic_dataset(chord_onsets_until_target_sec) % e.g. 0:789.5:5526.5;
 
 % Copyright (c) 2012-2013 The Regents of the University of California
 % All Rights Reserved.
