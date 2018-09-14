@@ -14,7 +14,6 @@ out = add_calculation_type(N, tmp, out);
 out.window = tmp(:, 6);
 out = add_post_target_window(N, tmp, out);
 out = add_value(N, tmp, out);
-out.value = NaN(N, 1);
 end
 
 function out = add_time_constants(N, tmp, out)
@@ -41,7 +40,7 @@ for i = 1:N
     if iscell(tmp2)
         a = tmp2{1}(1);
         b = tmp2{1}(2);
-        tmp2 = strcat(a, ',', b);
+        tmp2 = strcat(a, '+', b);
     end
     out.calculation_type(i) = {tmp2};
 end
@@ -58,6 +57,7 @@ end
 end
 
 function out = add_value(N, tmp, out)
+out.value = NaN(N, 1);
 for i = 1:N
     tmp2 = tmp(i, 8);
     out.value(i) = tmp2{1};

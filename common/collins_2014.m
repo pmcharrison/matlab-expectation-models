@@ -205,4 +205,5 @@ end
 % ylabel('Fitted Response Time (Zero-Mean)')
 
 out = zeroMeanRTfit;
+results = format_collins_results(results);
 end

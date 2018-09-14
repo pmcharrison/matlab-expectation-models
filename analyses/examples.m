@@ -12,10 +12,10 @@ input_file = 'id=1_genre=classical_c-id=1009_e-id=75_ic_category_1.wav';
 
 % [leman, collins, collins_detail] = analyse_sequence(input_file, input_dir, params, jlmtpath);
 
-temp_dir = 'C:\Users\Peter\Documents\MATLAB\temp';
-if exist(temp_dir, 'dir')
-    rmdir temp_dir
+output_dir = 'C:\Users\Peter\Documents\MATLAB\temp';
+if exist(output_dir, 'dir')
+    rmdir(output_dir, 's')
 end
-mkdir temp_dir
+mkdir output_dir
 
-analyse_dataset(input_dir, temp_dir, params);
+analyse_dataset(input_dir, output_dir, params);
