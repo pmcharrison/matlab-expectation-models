@@ -19,7 +19,7 @@ jlmt_out = jlmt_proc_series(path, params.jlmt);
 
 %% Calculate metrics.
 % Parameters within this script can be experimented with if you wish.
-results = CollinsEtAl_calc_attributes(in_data, params, jlmt_out);
+	
 
 %% Predict zero-mean response times using our regression equation (2) from
 % the paper. The variables in this model are:
