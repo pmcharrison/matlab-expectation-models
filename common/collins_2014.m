@@ -12,14 +12,12 @@ function [out, results] = collins_2014(...
 % All Rights Reserved.
 
 manage_files(wav_dir, wav_file, jlmtpath);
-params = modified_collins_globals(struct, onsets);
-path = fullfile(params.paths.data_root, ...
-    'generic_dataset', 'generic_stimulus', 'audio', 'generic_stimulus.wav');
-jlmt_out = jlmt_proc_series(path, params.jlmt);
+[params, in_data] = init_params(onsets);
+jlmt_out = jlmt_proc_series(in_data, params.jlmt);
 
 %% Calculate metrics.
 % Parameters within this script can be experimented with if you wish.
-	
+results = CollinsEtAl_calc_attributes(in_data, params, jlmt_out);
 
 %% Predict zero-mean response times using our regression equation (2) from
 % the paper. The variables in this model are:
@@ -124,17 +122,14 @@ copyfile(fullfile(wav_dir, wav_file), ...
     input_audio_file_path, 'f');
 end
 
-function [params, ic, in_data] = init_params(onsets)
+function [params, in_data] = init_params(onsets)
 params = modified_collins_globals(struct, onsets);
-datasets = params.datasets;
 location = fullfile(params.paths.data_root, params.datasets(1).id);
 params.paths.stim_root = location;
-currPath = fullfile(location, 'generic_stimulus', 'audio');
-flist = 'generic_stimulus.wav';
-
+in_data = init_in_data(location);
 end
 
-function in_data = init_in_data(currPath, flist, location)
+function in_data = init_in_data(location)
 in_data = ensemble_init_data_struct;
 in_data.vars = {'path', 'filename', 'path_no_ext', 'name_no_ext'};
 ic = set_var_col_const(in_data.vars);
@@ -144,9 +139,8 @@ in_data.data{ic.filename} = {};
 in_data.data{ic.path_no_ext} = {};
 in_data.data{ic.name_no_ext} = {};
 
-in_data.data{ic.path}(end+1) = {currPath};
-in_data.data{ic.filename}(end+1) = {flist};
-in_data.data{ic.path_no_ext}(end+1) = {fullfile(location,...
-    contents(1).name)};
-in_data.data{ic.name_no_ext}(end+1) = {contents(1).name};
+in_data.data{ic.path}(end+1) = {fullfile(location, 'generic_stimulus', 'audio');};
+in_data.data{ic.filename}(end+1) = {'generic_stimulus.wav'};
+in_data.data{ic.path_no_ext}(end+1) = {fullfile(location, 'generic_stimulus')};
+in_data.data{ic.name_no_ext}(end+1) = {'generic_stimulus'};
 end
