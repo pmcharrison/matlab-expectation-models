@@ -1,4 +1,4 @@
-function out = format_collins_results(res)
+function out = format_collins_features(res)
 N = size(res, 1);
 
 % drop the first row, which just contains headers

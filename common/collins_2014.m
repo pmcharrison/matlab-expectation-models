@@ -1,34 +1,25 @@
 % This function is a modified version of CollinsEtAl_analysis.m
 % from the JLMT source code.
 
-function [out, results] = collins_2014(...
-    wav_file, wav_dir, ...
-    onsets, ... % in seconds
-    use_closure, ... % whether or not to use the model that incorporates closure
-    jlmtpath ...
-    )
-
 % Copyright (c) 2013 The Regents of the University of California
 % All Rights Reserved.
 
+% Refactoring and generalisation by Peter M. C. Harrison (Sep 2018)
+
+function [pred, formatted_features] = collins_2014(...
+    wav_file, wav_dir, ...
+    onset, ... % in seconds
+    use_closure, ... % whether or not to use the model that incorporates closure
+    jlmtpath ...
+    )
 manage_files(wav_dir, wav_file, jlmtpath);
-[params, in_data] = init_params(onsets);
+[params, in_data] = init_params(onset);
 jlmt_out = jlmt_proc_series(in_data, params.jlmt);
-
-%% Calculate metrics.
-% Parameters within this script can be experimented with if you wish.
-results = CollinsEtAl_calc_attributes(in_data, params, jlmt_out);
-stim_names2 = in_data.data{4}';
-[exp_vars2, alphaHat, betaHat] = get_coefs(use_closure)
-x = get_features(results, exp_vars2, stim_names2);
-
-
-% Form a linear combination with the coefficients to estimate zero-mean
-% response time.
-zeroMeanRTfit(1) = alphaHat + betaHat*x;
-
-out = zeroMeanRTfit;
-results = format_collins_results(results);
+features = CollinsEtAl_calc_attributes(in_data, params, jlmt_out);
+[exp_vars2, alphaHat, betaHat] = get_coefs(use_closure);
+x = get_feature_vector(in_data, features, exp_vars2);
+pred = alphaHat + betaHat * x;
+formatted_features = format_collins_features(features);
 end
 
 function  manage_files(wav_dir, wav_file, jlmtpath)
@@ -53,8 +44,8 @@ copyfile(fullfile(wav_dir, wav_file), ...
     input_audio_file_path, 'f');
 end
 
-function [params, in_data] = init_params(onsets)
-params = modified_collins_globals(struct, onsets);
+function [params, in_data] = init_params(onset)
+params = modified_collins_globals(struct, onset);
 location = fullfile(params.paths.data_root, params.datasets(1).id);
 params.paths.stim_root = location;
 in_data = init_in_data(location);
@@ -76,15 +67,11 @@ in_data.data{ic.path_no_ext}(end+1) = {fullfile(location, 'generic_stimulus')};
 in_data.data{ic.name_no_ext}(end+1) = {'generic_stimulus'};
 end
 
-function res = regression(results, use_closure)
-
-end
-
-function [exp_vars2, alphaHat, betaHat] = get_regression_coef(use_closure)
+function [exp_vars2, alphaHat, betaHat] = get_coefs(use_closure)
 if use_closure
-    coef_with_closure();
+    [exp_vars2, alphaHat, betaHat] = coef_with_closure();
 else
-    coef_without_closure();
+    [exp_vars2, alphaHat, betaHat] = coef_without_closure();
 end
 end
 
@@ -122,7 +109,8 @@ function [exp_vars2, alphaHat, betaHat] = coef_without_closure()
     betaHat = [-97.94 -245.20 0.13 -4.09];
 end
 
-function get_features(results, exp_vars2, stim_names2)
+function x = get_feature_vector(in_data, results, exp_vars2)
+stim_names2 = in_data.data{4}';
 nexp_vars = size(exp_vars2, 1);
 nresults = size(results, 1);
 x = zeros(nexp_vars, 1);
