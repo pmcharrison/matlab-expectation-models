@@ -2,7 +2,9 @@
 % This function is modified from the original (CollinsEtAl_globals)
 % so as to allow for the specification of arbitrary datasets.
 
-function defs = modified_collins_globals(defs, onset_sec)
+function defs = modified_collins_globals(...
+    defs, ...
+    onset_sec)
 
 % Copyright (c) 2013 The Regents of the University of California
 % All Rights Reserved.
