@@ -1,27 +1,18 @@
-function target_local_global_cor = leman_2000(input_wav_file_name, input_wav_dir, ...
-    target_chord_index, ... % 1-indexed
-    audio_leading_time_delay_sec, ... 
-    tempo, ...
+function res = leman_2000(...
+    wav_file, ...
+    wav_dir, ...
+    onsets, ...
+    offsets, ...
     local_decay_sec, ... % typically 0.1 
     global_decay_sec) % typically 1.5
-
-ioi = 60 / tempo;
-target_onset_sec = audio_leading_time_delay_sec + ...
-    (target_chord_index - 1) * ioi;
-target_offset_sec = audio_leading_time_delay_sec + ...
-    (target_chord_index) * ioi;
     
-
 %% Run the IPEM analysis
 % Read sound file
-[s,fs] = IPEMReadSoundFile(input_wav_file_name, input_wav_dir);
+[s,fs] = IPEMReadSoundFile(wav_file, wav_dir);
 % Convert to mono
 s = (s(1,:) + s(2,:)) / 2;
 % Get stimulus length
 audio_length_sec = length(s) / fs;
-% Express target onset/offset as a fraction of the stimulus length
-target_onset_frac = target_onset_sec / audio_length_sec;
-target_offset_frac = target_offset_sec / audio_length_sec;
 % Calculate the auditory nerve image
 [ANI,ANIFreq,ANIFilterFreqs] = IPEMCalcANI(s,fs);
 % Calculate the periodicity-pitch image
@@ -29,11 +20,26 @@ target_offset_frac = target_offset_sec / audio_length_sec;
 % Calculate the contextuality index
 [~,~,~,~,LocalGlobalComparison] = ... 
     IPEMContextualityIndex(PP,PPFreq,PPPeriods,[],local_decay_sec,global_decay_sec,[],0);
+% Calculate fit ratings for each onset and offset
+assert(isequal(size(onsets), size(offsets)));
+assert(size(onsets, 1) == 1);
+res = arrayfun(@(onset, offset) extract_cor(...
+    onset, offset, audio_length_sec, LocalGlobalComparison), ...
+    onsets, offsets);
+end
+
+function cor = extract_cor(...
+    onset, offset, audio_length, ... % in seconds
+    LocalGlobalComparison ...
+)
+% Express target onset/offset as a fraction of the stimulus length
+onset_frac = onset / audio_length;
+offset_frac = offset / audio_length;
 % Extract the contextuality index for the target chord
-contextuality_vector_length = length(LocalGlobalComparison);
-contextuality_onset_index = round(contextuality_vector_length * target_onset_frac);
-contextuality_offset_index = round(contextuality_vector_length * target_offset_frac);
-contextuality_target = LocalGlobalComparison(contextuality_onset_index:contextuality_offset_index);
+L = length(LocalGlobalComparison);
+onset_index = min(max(round(L * onset_frac), 1), L);
+offset_index = min(max(round(L * offset_frac), 1), L);
+cor_seq = LocalGlobalComparison(onset_index:offset_index);
 % Get the fit rating
-target_local_global_cor = mean(contextuality_target);
+cor = mean(cor_seq);
 end
