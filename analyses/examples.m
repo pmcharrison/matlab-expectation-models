@@ -1,16 +1,20 @@
-% Parameters
-params = struct;
-params.target_chord_index = 6; % 1-indexed
-params.audio_leading_time_delay_sec = 0.051;
-params.tempo = 60;
-params.leman2000_local_decay_sec = 0.1;
-params.leman2000_global_decay_sec = 1.5;
-params.collins2014_use_closure = false;
-   
-input_dir = 'C:\Users\Peter\Documents\MATLAB\matlab-expectation-models\media\example-wav-file';
-input_file = 'id=1_genre=classical_c-id=1009_e-id=75_ic_category_1.wav';
+par = struct();
+par.model = struct();
 
-% [leman, collins, collins_detail] = analyse_sequence(input_file, input_dir, params, jlmtpath);
+% Model parameters
+par.model = struct();
+par.model.leman_2000 = struct();
+par.model.collins_2014 = struct();
+
+par.model.leman_2000.local_decay_sec = 0.1;
+par.model.leman_2000.global_decay_sec = 1.5;
+par.model.collins_2014.use_closure = false;
+
+% Dataset parameters
+par.audio = struct();
+par.audio.onsets = 0:7;
+par.audio.offset = 1:8;
+par.audio.dir = 'C:\Users\Peter\Documents\MATLAB\matlab-expectation-models\media\example-wav-file';
 
 output_dir = 'C:\Users\Peter\Documents\MATLAB\temp';
 if exist(output_dir, 'dir')
@@ -19,3 +23,8 @@ end
 mkdir output_dir
 
 analyse_dataset(input_dir, output_dir, params);
+
+
+
+% input_file = 'id=1_genre=classical_c-id=1009_e-id=75_ic_category_1.wav';
+% [leman, collins, collins_detail] = analyse_sequence(input_file, input_dir, params, jlmtpath);

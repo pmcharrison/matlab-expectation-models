@@ -1,116 +1,25 @@
 % This function is a modified version of CollinsEtAl_analysis.m
 % from the JLMT source code.
 
-function [out, results] = collins_2014(input_wav_file_name, input_wav_dir, ...
-    target_chord_index, ... % 1-indexed
-    audio_leading_time_delay_sec, ... 
-    tempo, ...
-    jlmtpath, ...
-    use_closure) % whether or not to use the model that incorporates closure
+function [out, results] = collins_2014(...
+    wav_file, wav_dir, ...
+    onsets, ... % in seconds
+    use_closure, ... % whether or not to use the model that incorporates closure
+    jlmtpath ...
+    )
 
 % Copyright (c) 2013 The Regents of the University of California
 % All Rights Reserved.
 
-% This script is intended to accompany:
-%
-%  Tom Collins, Barbara Tillmann, Frederick S. Barrett, Charles Delbe, and
-%   Petr Janata. A combined model of sensory and cognitive representations
-%   underlying tonal expectation: from audio signals to behavior.
-%   Psychological Review, 121(1):33-65, 2014.
+%     Notes
+%     target_chord_index, ... % 1-indexed
+%     audio_leading_time_delay_sec, ... 
+%     tempo, ...
 
+manage_files(wav_dir, wav_file, jlmtpath);
+params = modified_collins_globals(struct, onsets);
 
-%% Write a copy of the audio file to the input directory
-input_dataset_path = fullfile(jlmtpath, 'data', 'CollinsEtAl', 'generic_dataset');
-if exist(input_dataset_path, 'dir')
-    rmdir(input_dataset_path, 's');
-end;
-mkdir(input_dataset_path);
-input_stimulus_path = fullfile(input_dataset_path, 'generic_stimulus');
-if ~exist(input_stimulus_path, 'dir')
-    mkdir(input_stimulus_path);
-end;
-input_audio_path = fullfile(input_stimulus_path, 'audio');
-if ~exist(input_audio_path, 'dir')
-    mkdir(input_audio_path);
-end;
-input_audio_file_path = fullfile(input_audio_path, 'generic_stimulus.wav');
-addpath(input_dataset_path);
-addpath(input_stimulus_path);
-addpath(input_audio_path);
-copyfile(fullfile(input_wav_dir, input_wav_file_name), ...
-    input_audio_file_path, 'f');
-
-%% Initialize parameters
-ioi = 60 / tempo;
-chord_onsets_until_target_sec = audio_leading_time_delay_sec + ...
-    (0:(target_chord_index - 1)) * ioi;
-
-params = modified_collins_globals(struct, chord_onsets_until_target_sec);
-
-% Initialize structure that will be passed to jlmt_proc_series
-in_data = ensemble_init_data_struct;
-in_data.vars = {'path', 'filename', 'path_no_ext', 'name_no_ext'};
-ic = set_var_col_const(in_data.vars);
-in_data.data{ic.path} = {};
-in_data.data{ic.filename} = {};
-in_data.data{ic.path_no_ext} = {};
-in_data.data{ic.name_no_ext} = {};
-
-%% Iterate over datasets, collect stimuli to analyze.
-datasets = params.datasets;
-nsets = length(datasets);
-zeroMeanRTobs = [];
-for iset = 1:nsets
-  fprintf('\n\nDataset %d\n', iset);
-  fprintf('Identifier: %s\n', datasets(iset).id);
-  % Determine file path
-  location_list = {};
-  location_root = fullfile(params.paths.data_root,...
-    params.datasets(iset).id);
-  if isfield(datasets(iset), 'subsets')
-    nsub = length(datasets(iset).subsets);
-    for isub = 1:nsub
-      fprintf('\tSubset %d: %s\n', isub, datasets(iset).subsets(isub).id);
-      location_list{isub} = fullfile(location_root,...
-        params.datasets(iset).subsets(isub).id);
-    end
-  else
-    location_list = {location_root};
-  end
-  for iloc = 1:length(location_list)
-    location = location_list{iloc};
-    params.paths.stim_root = location;
-    % Now create a data structure that is compatible with jlmt_proc_series,
-    % and run jlmt_proc_series.
-    contents = dir(location);
-    ndir = size(contents, 1);
-    for idir = 1:ndir
-      % If the name folder is one of the following, do nothing.
-      if strcmp(contents(idir).name, '.') || ...
-          strcmp(contents(idir).name, '..') || ...
-          strcmp(contents(idir).name, '.DS_Store') || ...
-          ~isempty(regexp(contents(idir).name, '.txt', 'once')) || ...
-          strcmp(contents(idir).name,'.svn')
-        continue
-      end
-      % Get parts of path and filename.
-      currPath = fullfile(location, contents(idir).name, 'audio');
-      flist = listFilesOfType(currPath, {'wav','mp3'});
-      if length(flist) > 1
-        error('Found %d files in %s\n', length(flist), currPath);
-      end
-      in_data.data{ic.path}(end+1) = {currPath};
-      in_data.data{ic.filename}(end+1) = flist;
-      in_data.data{ic.path_no_ext}(end+1) = {fullfile(location,...
-        contents(idir).name)};
-      in_data.data{ic.name_no_ext}(end+1) = {contents(idir).name};
-    end % for idir=
-  end % for iloc
-  zeroMeanRTobs = [zeroMeanRTobs; datasets(iset).zeroMeanRTobs];
-end % for iset=
-
-%% Run jlmt_proc_series.
-jlmt_out = jlmt_proc_series(in_data, params.jlmt);
+% jlmt_out = jlmt_proc_series(in_data, params.jlmt);
 
 %% Calculate metrics.
 % Parameters within this script can be experimented with if you wish.
@@ -193,17 +102,55 @@ for istim = 1:nstim
   zeroMeanRTfit(istim) = alphaHat + betaHat*x;
 end
 
-% % Now plot the fitted and observed RTs and add a line of best fit.
-% plot(zeroMeanRTobs, zeroMeanRTfit, 'ko')
-% hold on
-% pfit = polyfit(zeroMeanRTobs, zeroMeanRTfit, 1);
-% l = pfit(1)*(-250:1:250) + pfit(2);
-% plot(-250:1:250, l, '-');
-% hold off
-% title('Plot of Fitted v Observed RT Using Eq. 2 from Paper')
-% xlabel('Observed Response Time (Zero-Mean)')
-% ylabel('Fitted Response Time (Zero-Mean)')
-
 out = zeroMeanRTfit;
 results = format_collins_results(results);
+end
+
+function  manage_files(wav_dir, wav_file, jlmtpath)
+input_dataset_path = fullfile(jlmtpath, 'data', 'CollinsEtAl', 'generic_dataset');
+if exist(input_dataset_path, 'dir')
+    rmdir(input_dataset_path, 's');
+end;
+mkdir(input_dataset_path);
+input_stimulus_path = fullfile(input_dataset_path, 'generic_stimulus');
+if ~exist(input_stimulus_path, 'dir')
+    mkdir(input_stimulus_path);
+end;
+input_audio_path = fullfile(input_stimulus_path, 'audio');
+if ~exist(input_audio_path, 'dir')
+    mkdir(input_audio_path);
+end;
+input_audio_file_path = fullfile(input_audio_path, 'generic_stimulus.wav');
+addpath(input_dataset_path);
+addpath(input_stimulus_path);
+addpath(input_audio_path);
+copyfile(fullfile(wav_dir, wav_file), ...
+    input_audio_file_path, 'f');
+end
+
+function [params, ic, in_data] = init_params(onsets)
+params = modified_collins_globals(struct, onsets);
+datasets = params.datasets;
+location = fullfile(params.paths.data_root, params.datasets(1).id);
+params.paths.stim_root = location;
+currPath = fullfile(location, 'generic_stimulus', 'audio');
+flist = 'generic_stimulus.wav';
+
+end
+
+function in_data = init_in_data(currPath, flist, location)
+in_data = ensemble_init_data_struct;
+in_data.vars = {'path', 'filename', 'path_no_ext', 'name_no_ext'};
+ic = set_var_col_const(in_data.vars);
+
+in_data.data{ic.path} = {};
+in_data.data{ic.filename} = {};
+in_data.data{ic.path_no_ext} = {};
+in_data.data{ic.name_no_ext} = {};
+
+in_data.data{ic.path}(end+1) = {currPath};
+in_data.data{ic.filename}(end+1) = {flist};
+in_data.data{ic.path_no_ext}(end+1) = {fullfile(location,...
+    contents(1).name)};
+in_data.data{ic.name_no_ext}(end+1) = {contents(1).name};
 end
