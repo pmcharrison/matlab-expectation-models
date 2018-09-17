@@ -11,15 +11,11 @@ function [out, results] = collins_2014(...
 % Copyright (c) 2013 The Regents of the University of California
 % All Rights Reserved.
 
-%     Notes
-%     target_chord_index, ... % 1-indexed
-%     audio_leading_time_delay_sec, ... 
-%     tempo, ...
-
 manage_files(wav_dir, wav_file, jlmtpath);
 params = modified_collins_globals(struct, onsets);
-
-% jlmt_out = jlmt_proc_series(in_data, params.jlmt);
+path = fullfile(params.paths.data_root, ...
+    'generic_dataset', 'generic_stimulus', 'audio', 'generic_stimulus.wav');
+jlmt_out = jlmt_proc_series(path, params.jlmt);
 
 %% Calculate metrics.
 % Parameters within this script can be experimented with if you wish.
