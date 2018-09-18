@@ -1,28 +1,21 @@
-par = struct();
-par.model = struct();
+p = struct();
+p.input_dir = 'C:\Users\Peter\Documents\MATLAB\matlab-expectation-models\media\example-wav-files';
+p.output_dir = 'C:\Users\Peter\Documents\MATLAB\temp';
+p.onsets = 0:2;
+p.offsets = 1:3;
+p.use_closure = true;
+p.leman_2000_local_decay_sec = [0.1 0.5];
+p.leman_2000_global_decay_sec = [1.5 4];
 
-% Model parameters
-par.model = struct();
-par.model.leman_2000 = struct();
-par.model.collins_2014 = struct();
+analyse_dataset(...
+    p.input_dir, ...
+    p.output_dir, ...
+    p.onsets, ...
+    p.offsets, ...
+    p.use_closure, ...
+    p.leman_2000_local_decay_sec, ...
+    p.leman_2000_global_decay_sec);
 
-par.model.leman_2000.local_decay_sec = 0.1;
-par.model.leman_2000.global_decay_sec = 1.5;
-par.model.collins_2014.use_closure = false;
-
-% Dataset parameters
-par.audio = struct();
-par.audio.onsets = 0:7;
-par.audio.offset = 1:8;
-par.audio.dir = 'C:\Users\Peter\Documents\MATLAB\matlab-expectation-models\media\example-wav-file';
-
-output_dir = 'C:\Users\Peter\Documents\MATLAB\temp';
-if exist(output_dir, 'dir')
-    rmdir(output_dir, 's')
-end
-mkdir output_dir
-
-analyse_dataset(input_dir, output_dir, params);
 
 
 
