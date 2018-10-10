@@ -16,6 +16,7 @@ res.par.n_rhythm = 3;
 res.par.use_closure = true;
 res.par.leman_2000_local_decay_sec =  [0.1 0.1 0.1 0.5 0.5 0.5];
 res.par.leman_2000_global_decay_sec = [1.5 2.5 4.0 1.5 2.5 4.0];
+res.par.do_collins = false;
 
 % Set up
 IPEMSetup
@@ -70,7 +71,8 @@ for stim_id = 1:res.par.n_stim
             res.par.use_closure, ...
             res.par.leman_2000_local_decay_sec, ...
             res.par.leman_2000_global_decay_sec, ...
-            jlmtpath);
+            jlmtpath, ...
+            res.par.do_collins);
         
         res.data{counter} = res_ij;
         
