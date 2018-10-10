@@ -1,3 +1,8 @@
+% 10 October 2018
+
+% Analysing stimuli for behavioural study of uncertainty and surprise
+% (Peter M. C. Harrison and Vincent Cheung).
+
 res = struct();
 
 % Options
