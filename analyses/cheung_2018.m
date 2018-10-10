@@ -7,7 +7,7 @@ res = struct();
 
 % Options
 res.par = struct();
-res.par.stimulus_dir = '/Users/peter/Dropbox/Academic/projects/entropy-surprisal/entropy_surprisal_fmri/input/final-experiment-stimuli';
+res.par.stimulus_dir = 'C:\Users\Peter\Dropbox\Academic\projects\entropy-surprisal\entropy_surprisal_fmri\input\final-experiment-stimuli';
 res.par.pitch_dir = fullfile(res.par.stimulus_dir, 'pitches');
 res.par.audio_dir = fullfile(res.par.stimulus_dir, 'audio');
 res.par.output_file = fullfile(res.par.stimulus_dir, 'astm-analyses.mat');
@@ -22,16 +22,16 @@ IPEMSetup
 addpath('C:\Users\Peter\Documents\jlmt\')
 jlmt_startup;
 
+counter = 0;
+num_analyses = res.par.n_stim * res.par.n_rhythm;
+res.data = cell(num_analyses, 1);
+
 bar = waitbar(0,...
-    sprintf('0 / %i stimuli analysed', num_stimuli), ...
+    sprintf('0 / %i stimuli analysed', num_analyses), ...
     'Name','Computing Leman/Collins analyses...',...
     'CreateCancelBtn',...
     'setappdata(gcbf,''canceling'',1)');
 setappdata(bar,'canceling',0)
-
-counter = 0;
-num_analyses = res.par.n_stim * res.par.n_rhythm;
-res.data = cell(num_analyses, 1);
 
 for stim_id = 1:res.par.n_stim
     for rhythm_id = 1:res.par.n_rhythm
@@ -56,11 +56,11 @@ for stim_id = 1:res.par.n_stim
             'HeaderLines', 1);
         fclose(fid);
         
-        res_ij.onsets = out{2};
+        res_ij.onsets = transpose(out{2});
         res_ij.ioi = mean(diff(res_ij.onsets));
         res_ij.offsets = res_ij.onsets + res_ij.ioi;
         
-        res_ij.pitches = out(3:7);
+        res_ij.frequencies = out(3:7);
         
         [res_ij.leman, res_ij.collins, res_ij.collins_detail] = analyse_sequence(...
             res_ij.audio_file, ...
@@ -72,9 +72,9 @@ for stim_id = 1:res.par.n_stim
             res.par.leman_2000_global_decay_sec, ...
             jlmtpath);
         
-        res{counter} = res_ij;
+        res.data{counter} = res_ij;
         
-        save(res.par.output_file, res);
+        save(res.par.output_file, 'res');
         
         waitbar(counter / num_analyses, bar, ...
             sprintf('%i / %i stimuli analysed', counter, num_analyses));
