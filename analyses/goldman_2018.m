@@ -1,7 +1,7 @@
 p = struct();
 % p.input_dir = 'C:\Users\Peter\Documents\MATLAB\matlab-expectation-models\media\example-wav-files';
 p.input_dir = 'C:\Users\Peter\Dropbox\Academic\projects\harmony\HarmonyExpectancyEEG\input\stimuli\main\wav';
-p.output_path = 'C:\Users\Peter\Dropbox\Academic\projects\harmony\HarmonyExpectancyEEG\input\models\astm.mat';
+p.output_path = 'C:\Users\Peter\Dropbox\Academic\projects\harmony\HarmonyExpectancyEEG\input\models\test.mat';
 p.onsets = 0:7;
 p.offsets = 1:8;
 p.use_closure = true;
