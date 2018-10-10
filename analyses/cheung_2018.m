@@ -14,8 +14,10 @@ res.par.output_file = fullfile(res.par.stimulus_dir, 'astm-analyses.mat');
 res.par.n_stim = 30;
 res.par.n_rhythm = 3;
 res.par.use_closure = true;
-res.par.leman_2000_local_decay_sec =  [0.1 0.1 0.1 0.5 0.5 0.5];
-res.par.leman_2000_global_decay_sec = [1.5 2.5 4.0 1.5 2.5 4.0];
+res.par.leman_2000_local_decay_sec =  [0.1];
+res.par.leman_2000_global_decay_sec = [1.5];
+% res.par.leman_2000_local_decay_sec =  [0.1 0.1 0.1 0.5 0.5 0.5];
+% res.par.leman_2000_global_decay_sec = [1.5 2.5 4.0 1.5 2.5 4.0];
 res.par.do_collins = false;
 
 % Set up
