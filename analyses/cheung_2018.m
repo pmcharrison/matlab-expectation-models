@@ -16,9 +16,9 @@ res.par.n_rhythm = 3;
 res.par.use_closure = true;
 res.par.leman_2000_local_decay_sec =  [0.1];
 res.par.leman_2000_global_decay_sec = [1.5];
-% res.par.leman_2000_local_decay_sec =  [0.1 0.1 0.1 0.5 0.5 0.5];
-% res.par.leman_2000_global_decay_sec = [1.5 2.5 4.0 1.5 2.5 4.0];
-res.par.do_collins = false;
+res.par.leman_2000_local_decay_sec =  [0.1 0.1 0.1 0.5 0.5 0.5];
+res.par.leman_2000_global_decay_sec = [1.5 2.5 4.0 1.5 2.5 4.0];
+res.par.do_collins = true;
 
 % Set up
 IPEMSetup
@@ -84,4 +84,6 @@ for stim_id = 1:res.par.n_stim
             sprintf('%i / %i stimuli analysed', counter, num_analyses));
     end
 end
+
+delete(bar);
 
